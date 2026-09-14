@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Voice Assistant</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+      }
+
+      .assistant {
+        width: 90%;
+        max-width: 500px;
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        margin-bottom: 10px;
+      }
+
+      .robot {
+        font-size: 70px;
+        margin: 20px;
+      }
+
+      #status {
+        margin: 15px 0;
+        color: #555;
+      }
+
+      #output {
+        min-height: 60px;
+        background: #f2f2f2;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: left;
+      }
+
+      button {
+        border: none;
+        padding: 15px 25px;
+        border-radius: 30px;
+        background: #667eea;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #4c5fd5;
+      }
+
+      .commands {
+        margin-top: 20px;
+        text-align: left;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      .commands h3 {
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="assistant">
+      <h1>🎙️ Voice Assistant</h1>
+
+      <div class="robot">🤖</div>
+
+      <p id="status">Click the button and speak</p>
+
+      <div id="output">Assistant is ready...</div>
+
+      <button onclick="startListening()">🎤 Start Listening</button>
+
+      <div class="commands">
+        <h3>Try saying:</h3>
+        <p>• Hello</p>
+        <p>• What is the time?</p>
+        <p>• What is today's date?</p>
+        <p>• Search Python programming</p>
+        <p>• Search artificial intelligence</p>
+        <p>• Open Google</p>
+        <p>• Open YouTube</p>
+      </div>
+    </div>
+
+    <script>
+      const statusText = document.getElementById("status");
+      const output = document.getElementById("output");
+
+      // Check browser support
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        output.innerHTML =
+          "❌ Speech recognition is not supported. Please use Google Chrome.";
+      }
+
+      const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+      if (recognition) {
+        recognition.lang = "en-IN";
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = function () {
+          statusText.innerHTML = "🎤 Listening... Speak now";
+        };
+
+        recognition.onresult = function (event) {
+          const command = event.results[0][0].transcript.toLowerCase();
+
+          output.innerHTML = "<b>You:</b> " + command;
+
+          processCommand(command);
+        };
+
+        recognition.onerror = function (event) {
+          statusText.innerHTML = "❌ I couldn't understand. Please try again.";
+
+          speak("Sorry, I could not understand. Please repeat.");
+        };
+
+        recognition.onend = function () {
+          statusText.innerHTML = "Click the button to speak again";
+        };
+      }
+
+      // Start microphone
+      function startListening() {
+        if (!recognition) {
+          alert("Please use Google Chrome.");
+          return;
+        }
+
+        recognition.start();
+      }
+
+      // Text to speech
+      function speak(text) {
+        const speech = new SpeechSynthesisUtterance(text);
+
+        speech.lang = "en-IN";
+        speech.rate = 1;
+        speech.pitch = 1;
+
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(speech);
+      }
+
+      // Process commands
+      function processCommand(command) {
+        // Hello
+        if (
+          command.includes("hello") ||
+          command.includes("hi") ||
+          command.includes("hey")
+        ) {
+          const reply = "Hello! How can I help you?";
+
+          output.innerHTML += "<br><br><b>Assistant:</b> " + reply;
+
+          speak(reply);
+        }
+
+        // Time
+        else if (command.includes("time") || command.includes("current time")) {
+          const now = new Date();
+
+          const time = now.toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+          const reply = "The current time is " + time;
+
+          output.innerHTML += "<br><br><b>Assistant:</b> " + reply;
+
+          speak(reply);
+        }
+
+        // Date
+        else if (command.includes("date") || command.includes("today")) {
+          const now = new Date();
+
+          const date = now.toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          });
+
+          const reply = "Today's date is " + date;
+
+          output.innerHTML += "<br><br><b>Assistant:</b> " + reply;
+
+          speak(reply);
+        }
+
+        // Google
+        else if (command.includes("open google")) {
+          const reply = "Opening Google";
+
+          output.innerHTML += "<br><br><b>Assistant:</b> " + reply;
+
+          speak(reply);
+
+          setTimeout(function () {
+            window.open("https://www.google.com", "_blank");
+          }, 1000);
+        }
+
+        // YouTube
+        else if (command.includes("open youtube")) {
+          const reply = "Opening YouTube";
+
+          output.innerHTML += "<br><br><b>Assistant:</b> " + reply;
+
+          speak(reply);
+
+          setTimeout(function () {
+            window.open("https://www.youtube.com", "_blank");
+          }, 1000);
+        }
+
+        // Search
+        else if (
+          command.startsWith("search") ||
+          command.includes("search for")
+        ) {
+          let searchText = command
+            .replace("search for", "")
+            .replace("search", "")
+            .trim();
+
+          if (searchText === "") {
+            const reply = "Please tell me what you want to search.";
+
+            output.innerHTML += "<br><br><b>Assistant:</b> " + reply;
+
+            speak(reply);
+
+            return;
+          }
+
+          const reply = "Searching for " + searchText;
+
+          output.innerHTML += "<br><br><b>Assistant:</b> " + reply;
+
+          speak(reply);
+
+          setTimeout(function () {
+            const url =
+              "https://www.google.com/search?q=" +
+              encodeURIComponent(searchText);
+
+            window.open(url, "_blank");
+          }, 1000);
+        }
+
+        // Thank you
+        else if (command.includes("thank you") || command.includes("thanks")) {
+          const reply = "You're welcome!";
+
+          output.innerHTML += "<br><br><b>Assistant:</b> " + reply;
+
+          speak(reply);
+        }
+
+        // Unknown command
+        else {
+          const reply = "Sorry, I don't know that command. Please try again.";
+
+          output.innerHTML += "<br><br><b>Assistant:</b> " + reply;
+
+          speak(reply);
+        }
+      }
+    </script>
+  </body>
+</html>
